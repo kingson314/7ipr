@@ -202,7 +202,7 @@ public class CaseStatus{
 		}
 		for(String sta:auditingStatus){
 			if(sta.equals(status)){
-				return "审中";
+				return "在审";
 			}
 		}
 		return "";
@@ -214,6 +214,7 @@ public class CaseStatus{
 	 */
 	public String getByApplicationNo(String appNo) {
 		String rs="";
+		appNo=appNo.replace("CN", "").replace(".", "").trim();
 		Map<String, String> map=getPatentRusult(appNo);
 		if("true".equals(map.get("success"))){
 			rs= map.get("status");
@@ -231,12 +232,12 @@ public class CaseStatus{
 		return rs;
 	}
 	public static void main(String[] args) {
-		String appNo="2014200514388";
+		String appNo="CN201610200916.0";
 		System.out.println( CaseStatus.getInstance().getByApplicationNo(appNo));
 		String status="新案审查";
 		System.out.println( CaseStatus.getInstance().getBySatusName(status));
 		
-		appNo="20142005143881";
-		System.out.println( CaseStatus.getInstance().getByAppNo_Status(appNo,status));
+//		appNo="20142005143881";
+//		System.out.println( CaseStatus.getInstance().getByAppNo_Status(appNo,status));
 	}
 }
