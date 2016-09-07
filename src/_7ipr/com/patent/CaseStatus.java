@@ -100,7 +100,7 @@ public class CaseStatus{
 				status = elements.get(2).text();
 				status = status.substring(6);
 				status = removerepeatedchar(status);
-				status = getBySatusName(getStausName(status));
+				status = getStausName(status);
 
 				map.put("success", "true");
 				map.put("status", status);
@@ -137,7 +137,7 @@ public class CaseStatus{
 	 * @param str
 	 * @return
 	 */
-	public  String removerepeatedchar(String str) {
+	private  String removerepeatedchar(String str) {
 		if (str == null)
 			return str;
 		List<String> list = new ArrayList<String>();
@@ -189,7 +189,7 @@ public class CaseStatus{
 	 * @param status
 	 * @return
 	 */
-	public String getBySatusName(String status){
+	private String getBySatusName(String status){
 		for(String sta:validStatus){
 			if(sta.equals(status)){
 				return "有效";
@@ -212,30 +212,58 @@ public class CaseStatus{
 	 * @param appNo
 	 * @return
 	 */
-	public String getByApplicationNo(String appNo) {
-		String rs="";
-		appNo=appNo.replace("CN", "").replace(".", "").trim();
-		Map<String, String> map=getPatentRusult(appNo);
-		if("true".equals(map.get("success"))){
-			rs= map.get("status");
-		}else{
-			rs= "";
-		}
-		return rs;
-	} 
 	
-	public String getByAppNo_Status(String appNo,String status){
-		String rs=getByApplicationNo(appNo);
-		if("".equals(rs)){
-			rs= getBySatusName(status);
+//	二、根据专利申请号获取专利的状态（有效，无效，审中）
+//	接口：public String getByApplicationNo(String appNo);
+//	参数：appNo专利申请号，例如："CN201610200916.0"
+//	返回：“有效”，“无效”，“审中”三种状态中的一种。
+//	调用：CaseStatus.getInstance().getByApplicationNo(appNo);	场景：根据用户输入的申请号，或者DI大数据查询返回的专利申请号获取专利的状态
+//	public String getByApplicationNo(String appNo) {
+//		String rs="";
+//		appNo=appNo.replace("CN", "").replace(".", "").trim();
+//		Map<String, String> map=getPatentRusult(appNo);
+//		if("true".equals(map.get("success"))){
+//			rs= getBySatusName(map.get("status"));
+//		}else{
+//			rs= "";
+//		}
+//		return rs;
+//	} 
+	
+	/**
+	 * 根据申请号获取法律状态
+	 * @param appNo
+	 * @return
+	 */
+	public String[] getByAppNo(String appNo) {
+		try{
+			appNo=appNo.replace("CN", "").replace(".", "").trim();
+			Map<String, String> map=getPatentRusult(appNo);
+			if("true".equals(map.get("success"))){
+				String statusName=getBySatusName(map.get("status"));//有效，无效，在审
+				if("".equals(statusName)){
+					return null;
+				}
+				String[] rs=new String[2];
+				rs[0]=statusName;
+				rs[1]=map.get("status");				//原法律状态
+				return rs;
+			}else{
+				return null;
+			}
+		}catch(Exception e){
+			return null;
 		}
-		return rs;
-	}
+	} 
+ 
 	public static void main(String[] args) {
 		String appNo="CN201610200916.0";
-		System.out.println( CaseStatus.getInstance().getByApplicationNo(appNo));
-		String status="新案审查";
-		System.out.println( CaseStatus.getInstance().getBySatusName(status));
+//		System.out.println( CaseStatus.getInstance().getByApplicationNo(appNo));
+		String[] rs=CaseStatus.getInstance().getByAppNo(appNo);
+		if(rs!=null)
+		System.out.println(rs[0]+"/"+rs[1] );
+//		String status="新案审查";
+//		System.out.println( CaseStatus.getInstance().getBySatusName(status));
 		
 //		appNo="20142005143881";
 //		System.out.println( CaseStatus.getInstance().getByAppNo_Status(appNo,status));
